@@ -1,58 +1,43 @@
 import ScraperFC as sfc
 import traceback
-import pandas as pd
 
-scraper = sfc.FBRef()
-'''
-table = dict()
-try:
-    lg_table = scraper.scrape_league_table(year=2024, league='EPL')
-    table = lg_table.to_dict()
-except:
-    traceback.print_exc()
-finally:
-    scraper.close()
+#reductions of leagues to FBRef
+league_FBRef = {
+    0 : 'Champions League', 1 : 'Europa League', 2 : 'Europa Conference League', 3 : 'EPL', 4 : 'Ligue 1',
+    5 : 'Bundesliga', 6 : 'Serie A', 7 : 'La Liga'
+}
 
-name_size = 16
-attendance_size = 9
-num_size = 5
-for column in table.keys():
-    space_cnt = 1
-    if column=='Squad' or column=='Goalkeeper' or column=='Goalkeeper':
-        space_cnt = max(1, name_size-len(column))
-    elif column=='Top Team Scorer':
-        space_cnt = max(1, name_size*2-5-len(column))
-    elif column == 'Squad':
-        space_cnt = max(1, attendance_size - len(column))
-    else:
-        space_cnt = max(1, num_size - len(column))
-    print(column, end = ' '*space_cnt)
-print()
 
-for i in range(20):
-    for column in table.keys():
-        space_cnt = 1
-        if column == 'Squad' or column == 'Goalkeeper' or column == 'Goalkeeper':
-            space_cnt = max(1, name_size - len(str(table[column][i])))
-        elif column == 'Top Team Scorer':
-            space_cnt = max(1, name_size * 2-5 - len(str(table[column][i])))
-        elif column == 'Squad':
-            space_cnt = max(1, attendance_size - len(str(table[column][i])))
-        else:
-            space_cnt = max(1, num_size - len(str(table[column][i])))
-        print(table[column][i], end=' '*space_cnt)
+def get_league_table(season, num_of_league):
+    scraper = sfc.FBRef()
+    table = None
+    try:
+        table = scraper.scrape_league_table(year=season, league=league_FBRef[num_of_league])
+    except:
+        traceback.print_exc()
+    finally:
+        scraper.close()
+    return table
+
+
+def print_league_table(table):
+    cnt_teams = table.shape[0]
+    tab = table.to_dict()
+    sizes_for_table = {
+        'Rk' : 2, 'Squad': 16, 'MP': 2, 'W' : 2, 'D' : 2, 'L' : 2, 'GF' : 3, 'GA' : 3, 'GD' : 3, 'Pts': 3,
+        'Pts/MP' : 6, 'xG': 4, 'xGA' : 4, 'xGD' : 4, 'xGD/90': 5, 'Last 5' : 6, 'Attendance' : 10,
+        'Top Team Scorer' : 42, 'Goalkeeper' : 15, 'Notes': 5
+    }
+    for value in tab.keys():
+        cnt_tables = max(0, sizes_for_table[value]-len(value))+1
+        print(value[:sizes_for_table[value]], end=' '*cnt_tables)
     print()
-'''
-link = 'https://fbref.com/en/matches/44b9a07c/West-Ham-United-Chelsea-August-20-2023-Premier-League'
+    for id in range(cnt_teams):
+        for value in tab.keys():
+            cnt_tables = max(0, sizes_for_table[value] - len(str(tab[value][id]))) + 1
+            print(str(tab[value][id])[:sizes_for_table[value]], end = ' '*cnt_tables)
+        print()
+    return
 
-try:
-    match = scraper.scrape_match(link=link)
-except:
-    # Catch and print any exceptions.
-    traceback.print_exc()
-finally:
-    # Again, make sure to close the scraper when you're done
-    scraper.close()
-
-otv = match['Home Player Stats'].values[0]['Team Sheet'].values[0].iat[0,0]
-print(otv, type(otv))
+table = get_league_table(2024, 3)
+print_league_table(table)
