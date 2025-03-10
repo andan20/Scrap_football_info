@@ -4,7 +4,7 @@ import telebot
 from telebot import types
 
 
-bot = telebot.TeleBot('5986190702:AAFDaHuHDXmk8f8BjMjH8O88rroazrH9oZI', parse_mode=None)
+bot = telebot.TeleBot('{TOKEN}', parse_mode=None)
 
 #Получение html кода странийы
 def get_souped_page(page_url):
